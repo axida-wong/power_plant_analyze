@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>边缘端 AI 智能诊断中心</title>
+    <style>
+        :root { 
+            --bg: #f4f7f6;
+            --panel: #ffffff;
+            --accent: #52c41a; /* 采用生机绿代表智能分析 */
+            --text-main: #333333;
+            --text-sub: #666666;
+            --border: #e0e0e0;
+        }
+        body { background: var(--bg); color: var(--text-main); font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; padding: 40px; margin: 0; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .back-link { color: #888; text-decoration: none; font-size: 14px; display: inline-block; margin-bottom: 20px; transition: color 0.2s; }
+        .back-link:hover { color: #007bff; }
+        
+        .report-card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 30px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+        h2 { margin-top: 0; font-size: 22px; border-left: 5px solid var(--accent); padding-left: 12px; color: #111; display: flex; align-items: center; gap: 10px; }
+        
+        .meta-info { font-size: 13px; color: #999; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed var(--border); }
+        
+        /* 绚丽的等待动画 */
+        .loading-box { text-align: center; padding: 60px 20px; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* AI 文本排版样式 */
+        .ai-content { font-size: 15px; line-height: 1.8; color: #222; white-space: pre-line; background: #fafafa; padding: 20px; border-radius: 8px; border: 1px solid #eee; display: none; }
+        
+        .btn-retry { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 15px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="/" class="back-link">⇠ 返回实时监测主界面</a>
+    
+    <div class="report-card">
+        <h2>🤖 大模型核心诊断报告</h2>
+        <div class="meta-info">
+            <span>执行引擎: llama.cpp (本地离线私有部署)</span> &nbsp;|&nbsp; 
+            <span>基础模型: Gemma-4B-E4B</span> &nbsp;|&nbsp;
+            <span id="report-time">分析时间：加载中...</span>
+        </div>
+
+        <div id="loading-area" class="loading-box">
+            <div class="spinner"></div>
+            <div style="color: #555; font-weight: 500;">正在提取 SQLite 异常轨迹并请求本地 AI 推理...</div>
+            <div style="font-size: 12px; color: #a0a0a0;">(树莓派边缘计算约需要 5~15 秒，请稍后)</div>
+        </div>
+
+        <div id="ai-output" class="ai-content"></div>
+        
+        <button id="retryBtn" class="btn-retry" onclick="fetchAIAnalysis()">🔄 重新生成诊断报告</button>
+    </div>
+</div>
+
+<script>
+    async function fetchAIAnalysis() {
+        const loadingArea = document.getElementById('loading-area');
+        const aiOutput = document.getElementById('ai-output');
+        const retryBtn = document.getElementById('retryBtn');
+        const loadingText = document.querySelector('#loading-area div:nth-child(2)');
+        
+        loadingArea.style.display = 'flex';
+        aiOutput.style.display = 'none';
+        retryBtn.style.display = 'none';
+        
+        loadingText.innerHTML = "🚀 后端已成功与树莓派建立连接...";
+        
+        // 4秒后如果还没好，说明在啃矩阵
+        setTimeout(() => {
+            if(loadingArea.style.display !== 'none') {
+                loadingText.innerHTML = "🧠 树莓派 3核正在全力疯狂推理中... 请坚持等一下...";
+            }
+        }, 4000);
+
+        try {
+            // 向你的 FastAPI 后端要最终的纯文本结果
+            const response = await fetch('/api/generate_ai_analysis');
+            const data = await response.json();
+            
+            loadingArea.style.display = 'none';
+            aiOutput.style.display = 'block';
+            retryBtn.style.display = 'inline-block';
+
+            if (data.status === 'success') {
+                // 🌟 直接渲染后端提炼好的故障诊断文本
+                aiOutput.innerHTML = data.analysis;
+                aiOutput.style.background = '#f6ffed';
+                aiOutput.style.borderColor = '#b7eb8f';
+                
+                // 顺便把“加载中...”的时间戳刷成现在的系统时间
+                document.getElementById('report-time').innerText = `分析时间：${new Date().toLocaleString()}`;
+            } else {
+                aiOutput.innerHTML = `<span style="color: #ff4d4f; font-weight: bold;">⚠️ 诊断遇到障碍</span><br><br>${data.analysis}`;
+                aiOutput.style.background = '#fff2f0';
+                aiOutput.style.borderColor = '#ffccc7';
+            }
+        } catch (error) {
+            loadingArea.style.display = 'none';
+            aiOutput.style.display = 'block';
+            retryBtn.style.display = 'inline-block';
+            aiOutput.innerHTML = `<span style="color: #ff4d4f; font-weight: bold;">❌ 通信失败</span><br><br>FastAPI 接口异常，请检查后端终端报错。`;
+        }
+    }
+
+    window.onload = fetchAIAnalysis;
+</script>
+
+</body>
+</html>

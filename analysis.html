@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>辅助分析界面 - 历史数据再设计</title>
+  <style>
+    :root {
+      --color-background-primary: #ffffff;
+      --color-background-tertiary: #f5f7fa;
+      --color-border-tertiary: #e8e8e8;
+      --color-text-primary: #333333;
+      --color-text-secondary: #888888;
+      --border-radius-lg: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; background: var(--color-background-tertiary); padding: 16px; min-height: 100vh; }
+    
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .back { font-size: 13px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
+    .page-title { font-size: 18px; font-weight: 500; color: var(--color-text-primary); }
+    
+    /* 通道切换工具栏 */
+    .filter-panel { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 12px 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; }
+    .filter-label { font-size: 12px; font-weight: bold; color: var(--color-text-primary); }
+    .filter-bar { display: flex; gap: 8px; }
+    .filter-btn { padding: 6px 14px; border: 0.5px solid var(--color-border-tertiary); background: #fdfdfd; border-radius: 6px; font-size: 12px; color: var(--color-text-secondary); cursor: pointer; transition: all 0.2s; }
+    .filter-btn:hover { background: #f0f4f8; }
+    .filter-btn.active { background: #185FA5; color: #fff; border-color: #185FA5; font-weight: 500; }
+
+    /* 四个指标卡片 */
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+    .metric { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 14px 16px; }
+    .metric-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 6px; letter-spacing: 0.03em; }
+    .metric-val { font-size: 26px; font-weight: 500; font-family: 'Consolas', monospace; }
+    .val-red { color: #E24B4A; }
+    .val-amber { color: #EF9F27; }
+    .val-blue { color: #185FA5; }
+    
+    /* 核心看板布局 */
+    .dashboard-grid { display: grid; grid-template-columns: 1fr 340px; gap: 12px; }
+    .main-panel { display: flex; flex-direction: column; gap: 12px; }
+    .panel { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 16px; }
+    .panel-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 12px; }
+    
+    /* 图表容器固定高度 */
+    .chart-container { height: 180px; position: relative; }
+    
+    .log-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
+    .log-table th { font-weight: 400; color: var(--color-text-secondary); padding: 8px 4px; border-bottom: 1px solid var(--color-border-tertiary); }
+    .log-table td { padding: 10px 4px; border-bottom: 0.5px solid var(--color-border-tertiary); color: var(--color-text-primary); }
+    
+    .badge { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 500; }
+    .badge-error { background: rgba(226,75,74,0.1); color: #E24B4A; }
+    .badge-warn { background: rgba(239,159,39,0.1); color: #EF9F27; }
+    
+    .footer-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 11px; color: var(--color-text-secondary); }
+    
+    /* 右侧时间轴样式 */
+    .timeline { display: flex; flex-direction: column; gap: 16px; margin-top: 8px; }
+    .tl-item { display: flex; gap: 12px; position: relative; font-size: 12px; }
+    .tl-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+    .dot-red { background: #E24B4A; box-shadow: 0 0 0 3px rgba(226,75,74,0.15); }
+    .dot-amber { background: #EF9F27; box-shadow: 0 0 0 3px rgba(239,159,39,0.15); }
+    .tl-time { font-family: 'Consolas', monospace; color: var(--color-text-secondary); font-size: 11px; }
+    .tl-main { font-weight: 500; color: var(--color-text-primary); margin: 2px 0; }
+    .tl-sub { color: var(--color-text-secondary); font-size: 11px; }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="back" onclick="window.location.href='/'">← 返回实时监测</div>
+    <div class="page-title">历史异常辅助分析中心</div>
+    <div style="width: 80px;"></div>
+  </div>
+
+  <div class="filter-panel">
+  <div class="filter-label">数据筛选通道:</div>
+  <div class="filter-bar" id="channel-filter-bar">
+    <button class="filter-btn active" data-channel="all">全部通道汇总</button>
+    <button class="filter-btn" data-channel="9232/ai0">发电机驱动端轴承 (ai0)</button>
+    <button class="filter-btn" data-channel="9232/ai1">发电机非驱动端轴承 (ai1)</button>
+    <button class="filter-btn" data-channel="9232/ai2">励磁机机壳振动 (ai2)</button>
+  </div>
+</div>
+
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label" id="label-today">当前通道警告总数</div>
+      <div class="metric-val val-red" id="metric-today">0</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label" id="label-week">当前通道累计异常</div>
+      <div class="metric-val val-red" id="metric-week">0</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">选中通道最高 RMS 峰值</div>
+      <div class="metric-val val-amber" id="metric-max-rms">0.00 <span style="font-size:12px">mm/s</span></div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">核心诊断分析目标</div>
+      <div class="metric-val val-blue" id="metric-freq-dev" style="font-size:16px; line-height:38px;">暂无</div>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="main-panel">
+      <div class="panel">
+        <div class="panel-title">选中通道异常有效值 (RMS) 历史演变趋势</div>
+        <div class="chart-container">
+          <canvas id="lineChart"></canvas>
+        </div>
+      </div>
+      
+      <div class="panel">
+        <div class="panel-title">全厂各监测通道历史报警频次对比 (全局对照)</div>
+        <div class="chart-container">
+          <canvas id="barChart"></canvas>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">诊断事件明细日志</div>
+        <table class="log-table">
+          <thead>
+            <tr>
+              <th>触发时间</th>
+              <th>故障设备/通道</th>
+              <th>诊断结论</th>
+              <th>有效值 RMS (mm/s)</th>
+            </tr>
+          </thead>
+          <tbody id="log-tbody">
+            <tr>
+              <td colspan="4" style="text-align:center; color:var(--color-text-secondary); padding:20px;">数据加载中...</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="footer-bar">
+          <div id="log-count">共 0 条记录</div>
+          <div>显示最近展示明细</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-panel">
+      <div class="panel" style="min-height: 100%;">
+        <div class="panel-title">通道专属突发事件时间轴</div>
+        <div class="timeline" id="timeline-container">
+          <div style="color:var(--color-text-secondary); font-size:12px;">正在拉取最新事件...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <script>
+    let barChart = null;
+    let lineChart = null;
+    let currentChannel = "all"; // 记录当前选中的通道
+
+    window.onload = () => {
+      // 首次加载默认拉取全部数据
+      fetchHistoryData(currentChannel);
+      // 绑定通道切换点击事件
+      initFilterEvents();
+    };
+
+    // 初始化通道切换器事件
+    function initFilterEvents() {
+      const buttons = document.querySelectorAll('#channel-filter-bar .filter-btn');
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          // 切换高亮
+          buttons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          
+          // 获取目标通道并重新拉取接口
+          currentChannel = btn.getAttribute('data-channel');
+          fetchHistoryData(currentChannel);
+        });
+      });
+    }
+
+    // 核心请求数据方法（带入参数 channel_id）
+    async function fetchHistoryData(channelId) {
+      try {
+        const res = await fetch(`/get_history?channel_id=${channelId}`);
+        if (!res.ok) throw new Error("后端接口响应异常");
+        const data = await res.json();
+        
+        // 1. 动态自适应修改卡片标签文字提示
+        if (channelId === "all") {
+          document.getElementById('label-today').innerText = "全厂今日警告总数";
+          document.getElementById('label-week').innerText = "全厂本周累计异常";
+        } else {
+          document.getElementById('label-today').innerText = "当前通道警告总数";
+          document.getElementById('label-week').innerText = "当前通道累计异常";
+        }
+
+        // 2. 渲染四个指标卡片数据
+        document.getElementById('metric-today').innerText = data.metrics.total_today;
+        document.getElementById('metric-week').innerText = data.metrics.total_week;
+        document.getElementById('metric-max-rms').innerHTML = `${data.metrics.max_rms} <span style="font-size:12px">mm/s</span>`;
+        document.getElementById('metric-freq-dev').innerText = data.metrics.frequent_device;
+
+        // 3. 动态渲染全厂对照柱状图
+        renderBarChart(data.bar_chart);
+
+        // 4. 动态渲染当前选中通道的历史变化趋势折线图
+        renderLineChart(data.logs);
+
+        // 5. 动态渲染当前通道的表格明细
+        renderTable(data.logs);
+
+        // 6. 动态渲染当前通道的右侧时间轴
+        renderTimeline(data.logs);
+
+      } catch (e) {
+        console.error("从后端拉取过滤历史数据失败:", e);
+      }
+    }
+
+    // 柱状图渲染（全局对比）
+    function renderBarChart(chartData) {
+      const labels = chartData.labels.length ? chartData.labels : ['暂无数据'];
+      const values = chartData.values.length ? chartData.values : [0];
+
+      if (barChart) barChart.destroy();
+
+      barChart = new Chart(document.getElementById('barChart'), {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: '报警次数',
+            data: values,
+            backgroundColor: ['#F09595', '#85B7EB', '#FAC775', '#A7D49B'],
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: '#888', font: { size: 11 } }, grid: { display: false } },
+            y: { ticks: { color: '#888', font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.05)' } }
+          }
+        }
+      });
+    }
+
+    // 折线图趋势（根据筛选数据实时演变）
+    function renderLineChart(logs) {
+      let displayLogs = [...logs].reverse();
+      if (displayLogs.length === 0) {
+        displayLogs = [{ time: '00:00', rms: 0 }];
+      }
+
+      const labels = displayLogs.map(l => l.time);
+      const rmsData = displayLogs.map(l => l.rms);
+
+      if (lineChart) lineChart.destroy();
+
+      lineChart = new Chart(document.getElementById('lineChart'), {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'RMS',
+            data: rmsData,
+            borderColor: '#185FA5',
+            backgroundColor: 'rgba(24,95,165,0.06)',
+            borderWidth: 1.5,
+            pointRadius: 3,
+            fill: true,
+            tension: 0.2
+          }, {
+            label: '警告线',
+            data: Array(labels.length).fill(3.5),
+            borderColor: '#EF9F27',
+            borderWidth: 1,
+            borderDash: [4, 4],
+            pointRadius: 0,
+            fill: false
+          }, {
+            label: '危险线',
+            data: Array(labels.length).fill(6.5),
+            borderColor: '#E24B4A',
+            borderWidth: 1,
+            borderDash: [4, 4],
+            pointRadius: 0,
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: '#888', font: { size: 10 }, maxTicksLimit: 10 }, grid: { display: false } },
+            y: { ticks: { color: '#888', font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.05)' } }
+          }
+        }
+      });
+    }
+
+    // 表格渲染
+    function renderTable(logs) {
+      const tbody = document.getElementById('log-tbody');
+      tbody.innerHTML = "";
+
+      if (logs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--color-text-secondary);padding:20px;">该通道暂无历史异常日志记录</td></tr>`;
+        return;
+      }
+
+      const displayLogs = logs.slice(0, 6);
+      displayLogs.forEach(item => {
+        const badgeClass = item.rms > 6.5 ? 'badge-error' : 'badge-warn';
+        const row = `
+          <tr>
+            <td style="color:var(--color-text-secondary)">${item.date_time || item.time}</td>
+            <td><strong>${item.alias}</strong></td>
+            <td><span class="badge ${badgeClass}">${item.msg}</span></td>
+            <td style="font-family:monospace; font-weight:bold;">${item.rms.toFixed(2)}</td>
+          </tr>
+        `;
+        tbody.insertAdjacentHTML('beforeend', row);
+      });
+      
+      document.getElementById('log-count').innerText = `当前筛选共 ${logs.length} 条记录`;
+    }
+
+    // 时间轴渲染
+    function renderTimeline(logs) {
+      const container = document.getElementById('timeline-container');
+      container.innerHTML = "";
+
+      if (logs.length === 0) {
+        container.innerHTML = `<div style="color:var(--color-text-secondary);font-size:12px;padding:10px 0;">该通道暂无最新事件</div>`;
+        return;
+      }
+
+      const recentEvents = logs.slice(0, 4);
+      recentEvents.forEach(item => {
+        const dotColor = item.rms > 6.5 ? 'dot-red' : 'dot-amber';
+        const advice = item.rms > 6.5 ? '建议立即停机动平衡核对' : '建议加强点检与状态观测';
+        
+        const itemHtml = `
+          <div class="tl-item">
+            <div class="tl-dot ${dotColor}"></div>
+            <div>
+              <div class="tl-time">${item.time}</div>
+              <div class="tl-main">${item.alias} ${item.msg}</div>
+              <div class="tl-sub">实时有效值 ${item.rms} mm/s · ${advice}</div>
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', itemHtml);
+      });
+    }
+  </script>
+</body>
+</html>
