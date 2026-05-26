@@ -1,0 +1,220 @@
+[
+  {
+    "file": "模组二2026-3-19 17-01-47.tdms",
+    "file_size_mb": 139.394,
+    "groups": [
+      {
+        "group_name": "_unnamedTask<3>",
+        "channels": [
+          {
+            "channel_name": "9250/ai0",
+            "data_type": "float64",
+            "num_samples": 18270000,
+            "properties": {
+              "NI_Scaling_Status": "unscaled",
+              "NI_Number_Of_Scales": 2,
+              "NI_Scale[1]_Scale_Type": "Linear",
+              "NI_Scale[1]_Linear_Slope": 1.2177916298980494e-05,
+              "NI_Scale[1]_Linear_Y_Intercept": 0.0,
+              "NI_Scale[1]_Linear_Input_Source": 0,
+              "NI_ChannelName": "9250/ai0",
+              "unit_string": "Pascals",
+              "NI_UnitDescription": "Pascals",
+              "NI_dBReference": 2e-05,
+              "wf_start_time": "2026-03-19T09:01:47.941623",
+              "wf_increment": 9.765624999999954e-06,
+              "wf_start_offset": 0.0,
+              "wf_samples": 1
+            },
+            "sample_interval_s": 9.765624999999954e-06,
+            "sample_rate_hz": 102400.0,
+            "duration_s": 178.418,
+            "start_time": "2026-03-19T09:01:47.941623",
+            "stats": {
+              "min": -5.145413,
+              "max": 5.29055,
+              "mean": 0.028768,
+              "std": 1.337655
+            },
+            "first_5_values": [
+              -1.661421,
+              -1.785368,
+              -2.027392,
+              -2.173003,
+              -2.187166
+            ]
+          },
+          {
+            "channel_name": "9250/ai1",
+            "data_type": "float64",
+            "num_samples": 18270000,
+            "properties": {
+              "NI_Scaling_Status": "unscaled",
+              "NI_Number_Of_Scales": 2,
+              "NI_Scale[1]_Scale_Type": "Linear",
+              "NI_Scale[1]_Linear_Slope": 1.2177916298980494e-05,
+              "NI_Scale[1]_Linear_Y_Intercept": 0.0,
+              "NI_Scale[1]_Linear_Input_Source": 0,
+              "NI_ChannelName": "9250/ai1",
+              "unit_string": "Pascals",
+              "NI_UnitDescription": "Pascals",
+              "NI_dBReference": 2e-05,
+              "wf_start_time": "2026-03-19T09:01:47.941623",
+              "wf_increment": 9.765624999999954e-06,
+              "wf_start_offset": 0.0,
+              "wf_samples": 1
+            },
+            "sample_interval_s": 9.765624999999954e-06,
+            "sample_rate_hz": 102400.0,
+            "duration_s": 178.418,
+            "start_time": "2026-03-19T09:01:47.941623",
+            "stats": {
+              "min": -0.465087,
+              "max": 0.488554,
+              "mean": 0.027082,
+              "std": 0.106057
+            },
+            "first_5_values": [
+              0.05228,
+              0.038312,
+              0.070449,
+              0.078767,
+              0.059355
+            ]
+          }
+        ]
+      }
+    ],
+    "file_properties": {
+      "name": "模组二2026-3-19 17-01-47"
+    }
+  },
+  {
+    "file": "模组一2026-3-19 17-01-47.tdms",
+    "file_size_mb": 104.604,
+    "groups": [
+      {
+        "group_name": "_unnamedTask<2>",
+        "channels": [
+          {
+            "channel_name": "9232/ai0",
+            "data_type": "float64",
+            "num_samples": 9140000,
+            "properties": {
+              "NI_Scaling_Status": "unscaled",
+              "NI_Number_Of_Scales": 2,
+              "NI_Scale[1]_Scale_Type": "Linear",
+              "NI_Scale[1]_Linear_Slope": 3.756233e-05,
+              "NI_Scale[1]_Linear_Y_Intercept": -0.113399,
+              "NI_Scale[1]_Linear_Input_Source": 0,
+              "NI_ChannelName": "9232/ai0",
+              "unit_string": "g",
+              "NI_UnitDescription": "g",
+              "NI_dBReference": 1.0,
+              "wf_start_time": "2026-03-19T09:01:47.912273",
+              "wf_increment": 1.9531249999999963e-05,
+              "wf_start_offset": 0.0,
+              "wf_samples": 1
+            },
+            "sample_interval_s": 1.9531249999999963e-05,
+            "sample_rate_hz": 51200.0,
+            "duration_s": 178.5156,
+            "start_time": "2026-03-19T09:01:47.912273",
+            "stats": {
+              "min": -21.620462,
+              "max": 20.760401,
+              "mean": -0.010432,
+              "std": 4.640424
+            },
+            "first_5_values": [
+              6.205299,
+              7.120242,
+              4.596804,
+              -0.217146,
+              -4.884641
+            ]
+          },
+          {
+            "channel_name": "9232/ai1",
+            "data_type": "float64",
+            "num_samples": 9140000,
+            "properties": {
+              "NI_Scaling_Status": "unscaled",
+              "NI_Number_Of_Scales": 2,
+              "NI_Scale[1]_Scale_Type": "Linear",
+              "NI_Scale[1]_Linear_Slope": 3.751339e-05,
+              "NI_Scale[1]_Linear_Y_Intercept": -0.04820299,
+              "NI_Scale[1]_Linear_Input_Source": 0,
+              "NI_ChannelName": "9232/ai1",
+              "unit_string": "g",
+              "NI_UnitDescription": "g",
+              "NI_dBReference": 1.0,
+              "wf_start_time": "2026-03-19T09:01:47.912273",
+              "wf_increment": 1.9531249999999963e-05,
+              "wf_start_offset": 0.0,
+              "wf_samples": 1
+            },
+            "sample_interval_s": 1.9531249999999963e-05,
+            "sample_rate_hz": 51200.0,
+            "duration_s": 178.5156,
+            "start_time": "2026-03-19T09:01:47.912273",
+            "stats": {
+              "min": -5.552693,
+              "max": 5.47842,
+              "mean": 0.006627,
+              "std": 1.227005
+            },
+            "first_5_values": [
+              -1.562844,
+              -1.16674,
+              -0.554071,
+              0.02446,
+              0.431481
+            ]
+          },
+          {
+            "channel_name": "9232/ai2",
+            "data_type": "float64",
+            "num_samples": 9140000,
+            "properties": {
+              "NI_Scaling_Status": "unscaled",
+              "NI_Number_Of_Scales": 2,
+              "NI_Scale[1]_Scale_Type": "Linear",
+              "NI_Scale[1]_Linear_Slope": 7.511722e-05,
+              "NI_Scale[1]_Linear_Y_Intercept": -0.07713632000000001,
+              "NI_Scale[1]_Linear_Input_Source": 0,
+              "NI_ChannelName": "9232/ai2",
+              "unit_string": "Pascals",
+              "NI_UnitDescription": "Pascals",
+              "NI_dBReference": 2e-05,
+              "wf_start_time": "2026-03-19T09:01:47.912273",
+              "wf_increment": 1.9531249999999963e-05,
+              "wf_start_offset": 0.0,
+              "wf_samples": 1
+            },
+            "sample_interval_s": 1.9531249999999963e-05,
+            "sample_rate_hz": 51200.0,
+            "duration_s": 178.5156,
+            "start_time": "2026-03-19T09:01:47.912273",
+            "stats": {
+              "min": -0.316159,
+              "max": 0.347652,
+              "mean": 0.039767,
+              "std": 0.154666
+            },
+            "first_5_values": [
+              -0.002244,
+              0.00399,
+              0.003014,
+              -0.001418,
+              -0.007653
+            ]
+          }
+        ]
+      }
+    ],
+    "file_properties": {
+      "name": "模组一2026-3-19 17-01-47"
+    }
+  }
+]
